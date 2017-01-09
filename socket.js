@@ -34,6 +34,7 @@ socket.sockets.on('connection',function (socket) {
 
         }
     });
+
     function updateNicknames() {
         socket.emit('usernames',Object.keys(users));
     }
@@ -69,6 +70,20 @@ socket.sockets.on('connection',function (socket) {
         }
 
     });
+    socket.on('offer',function (data,callback) {
+        var jsonObj=JSON.parse(data);
+        var to=jsonObj.to;
+        var sdp=jsonObj.sdp;
+        if (to in users){
+            users[name].emit('offer',{sdp:sdp,from:socket.nickname});
+            console.log("offer passed to other end");
+        } else {
+            callback("info:user not available");
+        }
+    });
+
+
+
     socket.on('disconnect',function (data) {
         if (!socket.nickname) return;
         delete users[socket.nickname];
