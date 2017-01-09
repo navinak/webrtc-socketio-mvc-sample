@@ -75,14 +75,48 @@ socket.sockets.on('connection',function (socket) {
         var to=jsonObj.to;
         var sdp=jsonObj.sdp;
         if (to in users){
-            users[name].emit('offer',{sdp:sdp,from:socket.nickname});
-            console.log("offer passed to other end");
+            users[to].emit('offer',{sdp:sdp,from:socket.nickname});
+            console.log("offer passed to callee(B)");
         } else {
             callback("info:user not available");
         }
     });
+    socket.on('ringing',function (data,callback) {
+        var jsonObj=JSON.parse(data);
+        var from=jsonObj.from;
+        var  to=jsonObj.to;
+        if (to in users){
+            users[to].emit('ringing',{from:from});
+            console.log("ringing status send to caller(A)")
+        }else {
+            callback("info:user not available")
+        }
+    });
 
+    socket.on('answer',function (data,callback) {
+        var jsonObj=JSON.parse(data);
+        var from=jsonObj.from;
+        var to=jsonObj.to;
+        var sdp=jsonObj.sdp;
+        if (to in users){
+            users[to].emit('answer',{from:from,sdp:sdp});
+            console.log("answer is passed from callee(B) to caller(A)")
+        }else {
+            callback("error:call failed")
+        }
+    });
 
+    socket.on('ack',function (data,callback) {
+        var jsonObj=JSON.parse(data);
+        var from=jsonObj.from;
+        var to=jsonObj.to;
+        if (to in users){
+            users[to].emit('ack',{from:from});
+            console.log("ack send to callee(B)");
+        }else {
+            callback("error:call failed");
+        }
+    });
 
     socket.on('disconnect',function (data) {
         if (!socket.nickname) return;
