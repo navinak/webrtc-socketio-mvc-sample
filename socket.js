@@ -100,7 +100,7 @@ socket.sockets.on('connection',function (socket) {
         var sdp=jsonObj.sdp;
         if (to in users){
             users[to].emit('answer',{from:from,sdp:sdp});
-            console.log("answer is passed from callee(B) to caller(A)")
+            console.log("answer is passed from callee(B) to caller(A)");
         }else {
             callback("error:call failed")
         }
@@ -122,6 +122,33 @@ socket.sockets.on('connection',function (socket) {
         if (!socket.nickname) return;
         delete users[socket.nickname];
         updateNicknames();
-    })
+    });
+
+    socket.on('ice',function (data) {
+        var jsonObj=JSON.parse(data);
+        var to=jsonObj.to;
+        var sdp=jsonObj.sdp;
+        var sdpMid=jsonObj.sdpMid;
+        var sdpMLineIndex=jsonObj.sdpMLineIndex;
+        if (to in users){
+            users[to].emit('ice',{sdp:sdp,from:socket.nickname,sdpMid:sdpMid,sdpMLineIndex:sdpMLineIndex});
+            console.log("ice message passed to callee(B)");
+        } else {
+            callback("info:user not available");
+        }
+    });
+    socket.on('iceremove',function (data) {
+        var jsonObj=JSON.parse(data);
+        var to=jsonObj.to;
+        var sdp=jsonObj.sdp;
+        var sdpMid=jsonObj.sdpMid;
+        var sdpMLineIndex=jsonObj.sdpMLineIndex;
+        if (to in users){
+            users[to].emit('iceremove',{sdp:sdp,from:socket.nickname,sdpMid:sdpMid,sdpMLineIndex:sdpMLineIndex});
+            console.log("ice remove message passed to callee(B)");
+        } else {
+            callback("info:user not available");
+        }
+    });
 });
 module.exports=socket;
