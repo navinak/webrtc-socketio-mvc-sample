@@ -50,6 +50,7 @@ socket.sockets.on('connection',function (socket) {
                 if (name in users){
                     users[name].emit('wisper', {msg:msg,nick:socket.nickname});
                     console.log("wisper:");
+
                 }else {
                     callback("Error: enter a valid user");
                 }
@@ -77,6 +78,7 @@ socket.sockets.on('connection',function (socket) {
         if (to in users){
             users[to].emit('offer',{sdp:sdp,from:socket.nickname});
             console.log("offer passed to callee(B)");
+            callback("info:user is available")
         } else {
             callback("info:user not available");
         }
@@ -87,7 +89,8 @@ socket.sockets.on('connection',function (socket) {
         var  to=jsonObj.to;
         if (to in users){
             users[to].emit('ringing',{from:from});
-            console.log("ringing status send to caller(A)")
+            console.log("ringing status send to caller(A)");
+            callback("info:ringing status send to caller")
         }else {
             callback("info:user not available")
         }
@@ -101,6 +104,7 @@ socket.sockets.on('connection',function (socket) {
         if (to in users){
             users[to].emit('answer',{from:from,sdp:sdp});
             console.log("answer is passed from callee(B) to caller(A)");
+            callback("info:call connected")
         }else {
             callback("error:call failed")
         }
@@ -113,6 +117,7 @@ socket.sockets.on('connection',function (socket) {
         if (to in users){
             users[to].emit('ack',{from:from});
             console.log("ack send to callee(B)");
+            callback("info:ack send to callee")
         }else {
             callback("error:call failed");
         }
@@ -124,7 +129,7 @@ socket.sockets.on('connection',function (socket) {
         updateNicknames();
     });
 
-    socket.on('ice',function (data) {
+    socket.on('ice',function (data,callback) {
         var jsonObj=JSON.parse(data);
         var to=jsonObj.to;
         var sdp=jsonObj.sdp;
@@ -133,11 +138,12 @@ socket.sockets.on('connection',function (socket) {
         if (to in users){
             users[to].emit('ice',{sdp:sdp,from:socket.nickname,sdpMid:sdpMid,sdpMLineIndex:sdpMLineIndex});
             console.log("ice message passed to callee(B)");
+            callback("info:ice message passed")
         } else {
             callback("info:user not available");
         }
     });
-    socket.on('iceremove',function (data) {
+    socket.on('iceremove',function (data,callback) {
         var jsonObj=JSON.parse(data);
         var to=jsonObj.to;
         var sdp=jsonObj.sdp;
@@ -146,6 +152,7 @@ socket.sockets.on('connection',function (socket) {
         if (to in users){
             users[to].emit('iceremove',{sdp:sdp,from:socket.nickname,sdpMid:sdpMid,sdpMLineIndex:sdpMLineIndex});
             console.log("ice remove message passed to callee(B)");
+            callback("ice remove message passed to callee(B)")
         } else {
             callback("info:user not available");
         }
